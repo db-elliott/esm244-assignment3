@@ -1,0 +1,78 @@
+---
+title: "Task 1 - Principal Components Analysis"
+author: "Deanna Elliott"
+date: "2/15/2022"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(here)
+library(ggfortify)
+library(patchwork)
+library(gghighlight)
+library(lubridate)
+library(plotly)
+```
+
+### Overview
+
+
+### Data Wrangling
+
+Read in and subset data
+
+```{r}
+nutrients <- read_csv(here("data", "usda_nutrients.csv")) %>% 
+  filter(FoodGroup %in% c("Dairy and Egg Products", "Poultry Products",
+                          "Beef Products", "Cereal Grains and Pasta",
+                          "Vegetables and Vegetable Products", "Fruits and 
+                          Fruit Juices"))
+
+
+nutrients_pca <- nutrients %>% 
+  select(Energy_kcal:Fiber_g) %>% 
+  scale() %>% 
+  prcomp()
+
+```
+
+PCA visualization
+
+```{r}
+
+autoplot(nutrients_pca,
+         data = nutrients, 
+         loadings = TRUE,
+         colour = 'FoodGroup',
+         loadings.label = TRUE,
+         loadings.colour = 'black',
+         loadings.label.colour = 'black',
+         loadings.label.size = 3,
+         loadings.label.vjust = -0.5) +
+    scale_color_manual(values = c("darkorchid", "goldenrod1", "firebrick3",
+                                  "darkturquoise", "lightgreen")) +
+  labs(color = "Food Group") +
+  theme_classic()
+```
+
+### Interpretation
+Based on our principal component analysis biplot, we can see that carbohydrates and sugar are very highly correlated because the angle of their arrows is almost identical.This makes sense because all sugars are carbohydrates, though not all carbohydrates are sugar. Fiber is also strongly correlated with carbohydrates and sugar. On the other hand, protein has a very low association with all three as their angles are nearly perpendicular. Fat is semi-correlated with protein, and energy less so. Fat is not strongly correlated with carbohydrates, sugar, and fiber. Energy is only slightly associated with those three variables.
+
+### Data Citation
+FoodData Central. (n.d.). US Department of Agriculture. Retrieved February 15, 2022, from https://fdc.nal.usda.gov/index.html
+
+
+
+
+
+
+
+
+
+
+

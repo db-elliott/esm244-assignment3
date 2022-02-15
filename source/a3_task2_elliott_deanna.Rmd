@@ -1,0 +1,95 @@
+---
+title: "Task 2 - Agglomerative Hierarchical Clustering"
+author: "Deanna Elliott"
+date: "2/15/2022"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(here)
+library(naniar)
+library(NbClust)
+library(factoextra)
+library(dendextend)
+library(ggdendro)
+```
+
+### Overview
+
+
+### Data Wrangling
+
+Read in and wrangle data
+
+```{r}
+sbc_chem <- read_csv(here("data", "sbc_lter_registered_stream_chemistry.csv")) %>% 
+  dplyr::na_if(-999) %>% 
+  drop_na() 
+
+chem_means <- sbc_chem %>% 
+  select(- timestamp_local) %>% 
+  group_by(site_code) %>% 
+  mutate(nh4_uM = mean(nh4_uM),
+         no3_uM = mean(no3_uM),
+         po4_uM = mean(po4_uM),
+         tdn_uM = mean(tdn_uM),
+         tdp_uM = mean(tdn_uM),
+         tpc_uM = mean(tpc_uM),
+         tpn_uM = mean(tpn_uM),
+         tpp_uM = mean(tpp_uM),
+         tss_mgperLiter = mean(tss_mgperLiter),
+         spec_cond_uSpercm = mean(spec_cond_uSpercm),
+         site_obs = n())
+
+chem_scaled <- chem_means %>% 
+  select(2:11)  %>% 
+  scale()
+
+rownames(sbc_chem_scaled) <- sbc_chem$site_code
+
+```
+
+
+```{r}
+
+# create distance matrix
+chem_dist <- dist(sbc_chem_scaled, method = "euclidean")
+
+# hierarchical clustering (complete linkage)
+chem_hc_complete <- hclust(chem_dist, method = 'complete')
+
+# plot using base plot
+plot(chem_hc_complete, cex = 0.6, hang = -1)
+```
+
+
+### Complete Linkage Vizualization
+
+
+### Takeaways
+
+
+### Data Citation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

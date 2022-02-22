@@ -13,20 +13,18 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
 library(here)
 library(ggfortify)
-library(patchwork)
-library(gghighlight)
-library(lubridate)
-library(plotly)
 ```
 
 ### Overview
 
+This report explores the relationships between food groups and the nutrients therein, as well as relationships between the nutrients themselves. Principal components analysis was used to reduce the dimensionality of the dataset, allowing clearer interpretation while minimizing information loss. All data was taken from the USDA's National Nutrient Database (aka FoodData Central).
 
 ### Data Wrangling
 
-Read in and subset data
-
 ```{r}
+
+# Read in and subset data
+
 nutrients <- read_csv(here("data", "usda_nutrients.csv")) %>% 
   filter(FoodGroup %in% c("Dairy and Egg Products", "Poultry Products",
                           "Beef Products", "Cereal Grains and Pasta",
@@ -41,9 +39,9 @@ nutrients_pca <- nutrients %>%
 
 ```
 
-PCA visualization
-
 ```{r}
+
+# PCA visualization
 
 autoplot(nutrients_pca,
          data = nutrients, 
@@ -59,6 +57,9 @@ autoplot(nutrients_pca,
   labs(color = "Food Group") +
   theme_classic()
 ```
+
+**Figure 1.** Principal components analysis biplot showing the relationships between six dietary nutrients in five food groups.
+
 
 ### Interpretation
 Based on our principal component analysis biplot, we can see that carbohydrates and sugar are very highly correlated because the angle of their arrows is almost identical.This makes sense because all sugars are carbohydrates, though not all carbohydrates are sugar. Fiber is also strongly correlated with carbohydrates and sugar. On the other hand, protein has a very low association with all three as their angles are nearly perpendicular. Fat is semi-correlated with protein, and energy less so. Fat is not strongly correlated with carbohydrates, sugar, and fiber. Energy is only slightly associated with those three variables.

@@ -12,70 +12,86 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 library(tidyverse)
 library(here)
-library(naniar)
 library(NbClust)
 library(factoextra)
-library(dendextend)
 library(ggdendro)
 ```
 
 ### Overview
 
+This report explores the relationships in water chemistry of nine sites within the Santa Barbara Long Term Ecological Research site in California. Aspects of water chemistry analyzed include ammonium, nitrate, and phosphate concentration, among other variables. Complete linkage agglomerative hierarchical analysis was used to determine which sites have similar water chemistry, as well as those that do not.
 
 ### Data Wrangling
 
-Read in and wrangle data
-
 ```{r}
-sbc_chem <- read_csv(here("data", "sbc_lter_registered_stream_chemistry.csv")) %>% 
-  dplyr::na_if(-999) %>% 
-  drop_na() 
+# read in and wrangle data
+
+sbc_chem <- read_csv(here("data", "sbc_lter_registered_stream_chemistry.csv")) %>% na_if(-999)
 
 chem_means <- sbc_chem %>% 
   select(- timestamp_local) %>% 
   group_by(site_code) %>% 
-  mutate(nh4_uM = mean(nh4_uM),
-         no3_uM = mean(no3_uM),
-         po4_uM = mean(po4_uM),
-         tdn_uM = mean(tdn_uM),
-         tdp_uM = mean(tdn_uM),
-         tpc_uM = mean(tpc_uM),
-         tpn_uM = mean(tpn_uM),
-         tpp_uM = mean(tpp_uM),
-         tss_mgperLiter = mean(tss_mgperLiter),
-         spec_cond_uSpercm = mean(spec_cond_uSpercm),
-         site_obs = n())
+  summarize(nh4_m = mean(nh4_uM, na.rm = T),
+         no3_m = mean(no3_uM, na.rm = T),
+         po4_m = mean(po4_uM, na.rm = T),
+         tdn_m = mean(tdn_uM, na.rm = T),
+         tdp_m = mean(tdn_uM, na.rm = T),
+         tpc_m = mean(tpc_uM, na.rm = T),
+         tpn_m = mean(tpn_uM, na.rm = T),
+         tpp_m = mean(tpp_uM, na.rm = T),
+         tss_m = mean(tss_mgperLiter, na.rm = T),
+         spec_cond_m = mean(spec_cond_uSpercm, na.rm = T)) %>% 
+  drop_na()
 
-chem_scaled <- chem_means %>% 
-  select(2:11)  %>% 
+chem_scale <- chem_means %>% 
+  select(-site_code) %>% 
   scale()
 
-rownames(sbc_chem_scaled) <- sbc_chem$site_code
-
+rownames(chem_scale) <- chem_means$site_code
 ```
 
 
 ```{r}
 
 # create distance matrix
-chem_dist <- dist(sbc_chem_scaled, method = "euclidean")
+chem_dist <- dist(chem_scale, method = "euclidean")
 
 # hierarchical clustering (complete linkage)
 chem_hc_complete <- hclust(chem_dist, method = 'complete')
-
-# plot using base plot
-plot(chem_hc_complete, cex = 0.6, hang = -1)
 ```
-
 
 ### Complete Linkage Vizualization
 
+```{r}
+
+# plot with ggdendrogram
+
+ggdendrogram(chem_hc_complete, rotate = TRUE) +
+  theme_minimal() +
+  labs(x = "Site", y = "Distance") 
+```
+
+**Figure 1. Dendrogram for Santa Barbara Channel water chemistry.** Hierarchical cluster analysis for water chemistry at nine sites within the Santa Barbara Long Term Ecological Research site in California. Sites with similar water chemistry have less distance between them.
+
+.
 
 ### Takeaways
+
+Our complete linkage hierarchical clustering analysis measures distance between the farthest pairs of observations in two clusters. This means it is focusing on maximum distances between our SBC LTER sites. The farther away two sites are from each other, the less similar their water chemistry.
+
+Based on our model,
+
+- Site ON02 has the most unique water chemistry
+  - Site RG01 is the most similar to ON02
+- Sites MC00 and AB00 have very similar water chemistry
+  - MC00 and AB00 are the most different from ON02
+- Sites RS02 and HO00 also have similar water chemistry
+  - Site GV01 is most similar to RS02 and HO00
 
 
 ### Data Citation
 
+Santa Barbara Coastal LTER and J. Melack. 2019. SBC LTER: Land: Stream chemistry in the Santa Barbara Coastal drainage area, ongoing since 2000 ver 16. Environmental Data Initiative. https://doi.org/10.6073/pasta/67a558a24ceed9a0a5bf5e46ab841174. 
 
 
 

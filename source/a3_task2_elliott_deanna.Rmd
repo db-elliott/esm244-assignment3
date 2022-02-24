@@ -26,6 +26,8 @@ This report explores the relationships in water chemistry of nine sites within t
 ```{r}
 # read in and wrangle data
 
+# test
+
 sbc_chem <- read_csv(here("data", "sbc_lter_registered_stream_chemistry.csv")) %>% na_if(-999)
 
 chem_means <- sbc_chem %>% 
